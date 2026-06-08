@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>U+ 현장 AI 도우미</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #0f1117; color: #e8eaf0; min-height: 100vh; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
+
+  /* Header */
+  .header { background: #161b27; border-bottom: 1px solid #1e2536; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-left { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .logo { background: linear-gradient(135deg, #e8002d, #ff4d6d); color: #fff; font-weight: 900; font-size: 15px; padding: 4px 9px; border-radius: 6px; }
+  .header-title { font-size: 15px; font-weight: 700; color: #c8cdd8; }
+  .hist-btn { background: #1e2536; border: 1px solid #2a3248; color: #8892a8; font-size: 12px; padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+
+  /* History panel */
+  .hist-panel { position: fixed; top: 58px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #161b27; border-bottom: 1px solid #1e2536; z-index: 200; max-height: 320px; overflow-y: auto; display: none; }
+  .hist-panel.open { display: block; }
+  .hist-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #1e2536; }
+  .hist-head span { font-size: 13px; font-weight: 700; color: #8892a8; }
+  .hist-close { background: none; border: none; color: #8892a8; font-size: 16px; cursor: pointer; }
+  .hist-empty { padding: 24px; text-align: center; color: #4a5568; font-size: 13px; }
+  .hist-item { padding: 12px 16px; border-bottom: 1px solid #1a2030; cursor: pointer; }
+  .hist-item:active { background: #1e2536; }
+  .hist-date { font-size: 11px; color: #4a5568; margin-bottom: 3px; }
+  .hist-equip { font-size: 13px; font-weight: 600; color: #6c8ebf; margin-bottom: 2px; }
+  .hist-sym { font-size: 12px; color: #8892a8; }
+
+  /* Home */
+  #home { padding: 20px 16px 40px; display: flex; flex-direction: column; gap: 24px; overflow-y: auto; }
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .sec-label { font-size: 12px; font-weight: 700; color: #8892a8; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .sec-num { background: #e8002d; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; }
+  .sec-opt { color: #4a5568; font-size: 11px; font-weight: 400; text-transform: none; }
+
+  /* Uplink */
+  .uplink-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .uplink-btn { background: #161b27; border: 1.5px solid #1e2536; border-radius: 10px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.15s; }
+  .uplink-btn.active { background: #0d1f3c; border-color: #3b6fd4; box-shadow: 0 0 0 2px rgba(59,111,212,0.25); }
+  .uplink-icon { font-size: 22px; }
+  .uplink-label { font-size: 11px; font-weight: 700; color: #c8cdd8; text-align: center; line-height: 1.3; }
+  .uplink-sub { font-size: 10px; color: #4a5568; text-align: center; }
+  .uplink-desc { background: #0d1f3c; border: 1px solid #1e3460; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #7aa3d4; display: none; }
+  .uplink-desc.show { display: block; }
+
+  /* Devices */
+  .dev-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+  .dev-btn { background: #161b27; border: 1.5px solid #1e2536; border-radius: 10px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; transition: all 0.15s; }
+  .dev-btn.active { background: #0d1f3c; border-color: #3b6fd4; box-shadow: 0 0 0 2px rgba(59,111,212,0.2); }
+  .dev-icon { font-size: 20px; }
+  .dev-label { font-size: 10px; font-weight: 700; color: #c8cdd8; text-align: center; }
+  .dev-sub { font-size: 9px; color: #4a5568; text-align: center; }
+
+  /* Symptoms */
+  .sym-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .sym-btn { background: #161b27; border: 1.5px solid #1e2536; border-radius: 20px; padding: 7px 12px; font-size: 12px; color: #8892a8; cursor: pointer; white-space: nowrap; transition: all 0.15s; font-family: inherit; }
+  .sym-btn.active { background: #1a0a0e; border-color: #e8002d; color: #ff4d6d; }
+
+  textarea { background: #161b27; border: 1.5px solid #1e2536; border-radius: 10px; padding: 12px; color: #c8cdd8; font-size: 13px; resize: none; outline: none; line-height: 1.6; width: 100%; font-family: inherit; }
+  textarea:focus { border-color: #3b6fd4; }
+
+  .start-btn { background: linear-gradient(135deg, #e8002d, #c0001f); border: none; border-radius: 12px; padding: 16px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; font-family: inherit; transition: opacity 0.2s; }
+  .start-btn:disabled { opacity: 0.35; }
+
+  /* Chat */
+  #chat { display: none; flex-direction: column; height: calc(100vh - 58px); }
+  #chat.active { display: flex; }
+  .config-bar { background: #161b27; border-bottom: 1px solid #1e2536; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .config-tags { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; }
+  .tag { font-size: 11px; padding: 3px 8px; border-radius: 5px; font-weight: 600; }
+  .tag-uplink { background: #0d2b1f; border: 1px solid #2d7a50; color: #4dba7f; }
+  .tag-dev { background: #0d1f3c; border: 1px solid #3b6fd4; color: #6c8ebf; }
+  .tag-sym { background: #1a0a0e; border: 1px solid #e8002d; color: #ff4d6d; font-weight: 400; }
+  .new-btn { background: #1e2536; border: none; color: #8892a8; font-size: 11px; padding: 6px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap; font-family: inherit; }
+
+  .msg-list { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 14px; }
+  .msg-row { display: flex; align-items: flex-start; gap: 8px; }
+  .msg-row.user { justify-content: flex-end; }
+  .avatar { background: linear-gradient(135deg, #e8002d, #c0001f); color: #fff; font-size: 10px; font-weight: 900; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .bubble { max-width: 82%; border-radius: 12px; padding: 11px 14px; line-height: 1.65; font-size: 13px; }
+  .bubble.user { background: #0d1f3c; border: 1px solid #1e3460; color: #a8c4f0; border-bottom-right-radius: 3px; white-space: pre-wrap; word-break: break-word; }
+  .bubble.ai { background: #161b27; border: 1px solid #1e2536; color: #d0d5e0; border-bottom-left-radius: 3px; white-space: pre-wrap; word-break: break-word; }
+  .typing { color: #4a5568; font-style: italic; font-size: 12px; }
+
+  .input-area { background: #161b27; border-top: 1px solid #1e2536; padding: 10px 12px; display: flex; gap: 8px; align-items: flex-end; }
+  .chat-input { flex: 1; background: #0f1117; border: 1.5px solid #1e2536; border-radius: 10px; padding: 10px 12px; color: #c8cdd8; font-size: 13px; resize: none; outline: none; line-height: 1.5; font-family: inherit; }
+  .chat-input:focus { border-color: #3b6fd4; }
+  .send-btn { background: #e8002d; border: none; border-radius: 10px; padding: 10px 16px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; }
+  .send-btn:disabled { opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left" onclick="goHome()">
+    <span class="logo">U+</span>
+    <span class="header-title">현장 AI 도우미</span>
+  </div>
+  <button class="hist-btn" onclick="toggleHistory()">📋 히스토리</button>
+</div>
+
+<!-- History Panel -->
+<div class="hist-panel" id="histPanel">
+  <div class="hist-head">
+    <span>최근 상담 내역</span>
+    <button class="hist-close" onclick="toggleHistory()">✕</button>
+  </div>
+  <div id="histList"><div class="hist-empty">저장된 내역 없음</div></div>
+</div>
+
+<!-- HOME -->
+<div id="home">
+  <!-- 01 개통방식 -->
+  <div class="section">
+    <div class="sec-label"><span class="sec-num">01</span> 개통방식 / 상위단</div>
+    <div class="uplink-grid">
+      <button class="uplink-btn" data-id="RN" onclick="selectUplink('RN')">
+        <span class="uplink-icon">🏗️</span>
+        <span class="uplink-label">광모뎀 개통</span>
+        <span class="uplink-sub">드랍댁내인입</span>
+      </button>
+      <button class="uplink-btn" data-id="ONT" onclick="selectUplink('ONT')">
+        <span class="uplink-icon">🔌</span>
+        <span class="uplink-label">초소형 ONT 개통</span>
+        <span class="uplink-sub">단자함 개통</span>
+      </button>
+      <button class="uplink-btn" data-id="L2" onclick="selectUplink('L2')">
+        <span class="uplink-icon">🔧</span>
+        <span class="uplink-label">L2 개통</span>
+        <span class="uplink-sub">즉시개통</span>
+      </button>
+    </div>
+    <div class="uplink-desc" id="uplinkDesc"></div>
+  </div>
+
+  <!-- 02 장비 -->
+  <div class="section">
+    <div class="sec-label"><span class="sec-num">02</span> 댁내 장비 선택</div>
+    <div class="dev-grid" id="devGrid"></div>
+  </div>
+
+  <!-- 03 증상 -->
+  <div class="section">
+    <div class="sec-label"><span class="sec-num">03</span> 증상 선택</div>
+    <div class="sym-grid" id="symGrid"></div>
+  </div>
+
+  <!-- 04 추가 -->
+  <div class="section">
+    <div class="sec-label"><span class="sec-num">04</span> 추가 상황 <span class="sec-opt">(선택)</span></div>
+    <textarea id="customText" rows="3" placeholder="예) 광품질 -18dBm, CEM 유선 정상, 고객 어제부터 안된다고 함..."></textarea>
+  </div>
+
+  <button class="start-btn" id="startBtn" onclick="startChat()" disabled>AI 트러블슈팅 시작 →</button>
+</div>
+
+<!-- CHAT -->
+<div id="chat">
+  <div class="config-bar">
+    <div class="config-tags" id="configTags"></div>
+    <button class="new-btn" onclick="goHome()">새 상담</button>
+  </div>
+  <div class="msg-list" id="msgList"></div>
+  <div class="input-area">
+    <textarea class="chat-input" id="chatInput" rows="2" placeholder="추가 증상이나 확인된 내용 입력..."
+      onkeydown="handleKey(event)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>전송</button>
+  </div>
+</div>
+
+<script>
+const UPLINK_INFO = {
+  RN:  { label: "광모뎀 개통",     icon: "🏗️", desc: "RN함체 → 드랍선 → 댁내 광모뎀 설치" },
+  ONT: { label: "초소형 ONT 개통", icon: "🔌", desc: "단자함 내 1:4 RN → C501PD + PSE 세트" },
+  L2:  { label: "L2 개통",         icon: "🔧", desc: "L2 스위치 포트 직결 개통" },
+};
+
+const DEVICES = [
+  { id:"C504L",    label:"C504L",        sub:"광모뎀",      icon:"📡" },
+  { id:"C514RL",   label:"C514RL",       sub:"광모뎀",      icon:"📡" },
+  { id:"C501PD",   label:"C501PD",       sub:"초소형ONT",   icon:"🔌" },
+  { id:"PSE",      label:"PSE",          sub:"전원공급장치", icon:"⚡" },
+  { id:"WiFi",     label:"기가 와이파이", sub:"공유기",      icon:"📶" },
+  { id:"IPTV",     label:"IPTV",         sub:"셋톱박스",    icon:"📺" },
+  { id:"VoIP",     label:"인터넷전화",   sub:"VoIP",        icon:"☎️" },
+  { id:"CPG4020N", label:"CPG-4020N",    sub:"인터넷팩스",  icon:"🖨️" },
+];
+
+const SYMPTOMS = [
+  "인터넷 불통 (완전 끊김)","인터넷 느림/불안정","광모뎀 LED 이상",
+  "Wi-Fi 연결 안됨","IPTV 화면 안나옴","전화 불통",
+  "개통 후 인증 안됨","PSE 전원 이상","팩스 송수신 불가",
+  "간헐적 끊김","속도 저하","단자함 구성 확인",
+];
+
+const SYSTEM_PROMPT = `당신은 LG U+ 소호 현장 기사 전용 AI 트러블슈팅 어시스턴트입니다.
+경력 무관 — 초보 기사도 혼자 해결할 수 있도록 Q&A 방식으로 단계별 안내합니다.
+
+■ 장비 지식
+- C504L / C514RL : 댁내 광모뎀 (자체 전원)
+- C501PD : 초소형 ONT. 무전원 환경 전용. 반드시 PSE 세트 사용
+- PSE : C501PD 전용 전원공급장치
+- 광모뎀 개통(드랍댁내인입) : RN함체(옥상/전주/외부) → 드랍광선로 → 댁내 C504L/C514RL
+- 초소형ONT 개통(단자함개통) : 단자함 내 1:4 RN → C501PD + PSE
+- L2 개통(즉시개통) : L2 스위치 포트 직결
+- CPG-4020N : 인터넷팩스 장비. 공유기 VoIP 포트 연결.
+- 기가 와이파이 공유기, IPTV 셋톱박스, VoIP 인터넷전화
+
+■ 연락처 / 에스컬레이션
+- 소호 고객센터 : 1544-8585
+- OMC(운용센터) : 국사 회선·포트 이상, VLAN 설정, 원격 조치 필요 시 연락
+- 114 : VoIP 재등록 요청 가능
+
+■ 자주 쓰는 해결 패턴
+- IPv6/IPv4 혼용 충돌 → 공유기 설정에서 IPv4 only로 변경 후 재부팅
+- VoIP 불통 → 전화기 공유기 직결(허브/탭 제거) → 재등록 안되면 114 요청
+- 광모뎀 교체 후에도 증상 지속 → 공유기 문제로 범위 좁혀 확인
+- 공유기 의심 → C504L LAN 포트에 노트북 직결 후 인터넷 정상 여부로 판별
+
+■ 답변 방식 (반드시 준수)
+1. 첫 답변 구조:
+   📋 상황 요약 (1~2줄)
+   🔍 가장 가능성 높은 원인 (1~2개)
+   ✅ 지금 당장 확인할 것 (번호 리스트, 1~3개만)
+   ❓ 확인 질문 딱 1개 (답 들으면 다음 단계로 좁힘)
+
+2. 추가 답변 구조:
+   → 답변 기반으로 원인 범위 좁히기
+   ✅ 다음 조치 (번호 리스트)
+   ❓ 다음 확인 질문 1개 (필요시)
+   해결됐으면 ✅ 해결 완료 또는 에스컬레이션 안내
+
+3. 이모지로 가독성:
+   📡 광모뎀/ONT | 📶 와이파이 | ☎️ 전화 | 📺 IPTV | ⚡ 전원
+   🔴 불량/오류 | 🟢 정상 | 🔄 재부팅 | 🔧 조치 | 📞 연락
+
+4. 문장 짧게. 전문용어 OK. 불필요한 설명 생략.
+5. 질문은 한 번에 1개만. 여러 개 동시에 묻지 말 것.
+6. 초보 기사 기준 — "어디를 보면 되는지" 위치까지 설명.`;
+
+// State
+let selectedUplink = null;
+let selectedDevices = new Set();
+let selectedSymptoms = new Set();
+let messages = [];
+let loading = false;
+let history = [];
+
+// Init
+(function init() {
+  // 장비 버튼 렌더
+  const dg = document.getElementById('devGrid');
+  DEVICES.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'dev-btn';
+    btn.dataset.id = d.id;
+    btn.innerHTML = `<span class="dev-icon">${d.icon}</span><span class="dev-label">${d.label}</span><span class="dev-sub">${d.sub}</span>`;
+    btn.onclick = () => toggleDevice(d.id, btn);
+    dg.appendChild(btn);
+  });
+
+  // 증상 버튼 렌더
+  const sg = document.getElementById('symGrid');
+  SYMPTOMS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'sym-btn';
+    btn.textContent = s;
+    btn.onclick = () => toggleSymptom(s, btn);
+    sg.appendChild(btn);
+  });
+
+  // 히스토리 로드
+  try {
+    const saved = localStorage.getItem('uplus_h4');
+    if (saved) history = JSON.parse(saved);
+  } catch {}
+
+  // 채팅 입력 감지
+  document.getElementById('chatInput').addEventListener('input', function() {
+    document.getElementById('sendBtn').disabled = !this.value.trim() || loading;
+  });
+  document.getElementById('customText').addEventListener('input', checkCanStart);
+})();
+
+function selectUplink(id) {
+  if (selectedUplink === id) {
+    selectedUplink = null;
+    document.querySelectorAll('.uplink-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('uplinkDesc').classList.remove('show');
+  } else {
+    selectedUplink = id;
+    document.querySelectorAll('.uplink-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.id === id);
+    });
+    const desc = document.getElementById('uplinkDesc');
+    desc.textContent = UPLINK_INFO[id].desc;
+    desc.classList.add('show');
+  }
+  checkCanStart();
+}
+
+function toggleDevice(id, btn) {
+  if (selectedDevices.has(id)) { selectedDevices.delete(id); btn.classList.remove('active'); }
+  else { selectedDevices.add(id); btn.classList.add('active'); }
+  checkCanStart();
+}
+
+function toggleSymptom(s, btn) {
+  if (selectedSymptoms.has(s)) { selectedSymptoms.delete(s); btn.classList.remove('active'); }
+  else { selectedSymptoms.add(s); btn.classList.add('active'); }
+  checkCanStart();
+}
+
+function checkCanStart() {
+  const custom = document.getElementById('customText').value.trim();
+  const can = selectedUplink || selectedDevices.size > 0 || selectedSymptoms.size > 0 || custom;
+  document.getElementById('startBtn').disabled = !can;
+}
+
+function buildQuery() {
+  const parts = [];
+  if (selectedUplink) {
+    const u = UPLINK_INFO[selectedUplink];
+    parts.push(`[개통방식]: ${u.label} — ${u.desc}`);
+  }
+  if (selectedDevices.size > 0) {
+    const devLabels = [...selectedDevices].map(id => {
+      const d = DEVICES.find(x => x.id === id);
+      return d ? `${d.label}(${d.sub})` : id;
+    }).join(', ');
+    parts.push(`[댁내장비]: ${devLabels}`);
+  }
+  const syms = [...selectedSymptoms];
+  const custom = document.getElementById('customText').value.trim();
+  if (custom) syms.push(custom);
+  if (syms.length > 0) parts.push(`[증상/상황]: ${syms.join(', ')}`);
+  return parts.join('\n');
+}
+
+async function callClaude(msgs) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
+      messages: msgs,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${data?.error?.message || '알 수 없는 오류'}`);
+  if (data.type === 'error') throw new Error(data.error?.message || 'API 오류');
+  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  if (!text) throw new Error('빈 응답');
+  return text;
+}
+
+function appendMessage(role, content) {
+  const list = document.getElementById('msgList');
+  const row = document.createElement('div');
+  row.className = `msg-row ${role}`;
+  if (role === 'ai') {
+    row.innerHTML = `<div class="avatar">AI</div><div class="bubble ai"></div>`;
+    row.querySelector('.bubble').textContent = content;
+  } else {
+    row.innerHTML = `<div class="bubble user"></div>`;
+    row.querySelector('.bubble').textContent = content;
+  }
+  list.appendChild(row);
+  list.scrollTop = list.scrollHeight;
+  return row;
+}
+
+function showTyping() {
+  const list = document.getElementById('msgList');
+  const row = document.createElement('div');
+  row.className = 'msg-row ai';
+  row.id = 'typingRow';
+  row.innerHTML = `<div class="avatar">AI</div><div class="bubble ai"><span class="typing">분석 중 ···</span></div>`;
+  list.appendChild(row);
+  list.scrollTop = list.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typingRow');
+  if (t) t.remove();
+}
+
+function renderConfigTags() {
+  const ct = document.getElementById('configTags');
+  ct.innerHTML = '';
+  if (selectedUplink) {
+    const u = UPLINK_INFO[selectedUplink];
+    const s = document.createElement('span');
+    s.className = 'tag tag-uplink';
+    s.textContent = `${u.icon} ${u.label}`;
+    ct.appendChild(s);
+  }
+  selectedDevices.forEach(id => {
+    const d = DEVICES.find(x => x.id === id);
+    if (!d) return;
+    const s = document.createElement('span');
+    s.className = 'tag tag-dev';
+    s.textContent = `${d.icon} ${d.label}`;
+    ct.appendChild(s);
+  });
+  selectedSymptoms.forEach(sym => {
+    const s = document.createElement('span');
+    s.className = 'tag tag-sym';
+    s.textContent = sym;
+    ct.appendChild(s);
+  });
+}
+
+async function startChat() {
+  if (loading) return;
+  const query = buildQuery();
+  messages = [{ role: 'user', content: query }];
+
+  // Switch to chat view
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('chat').classList.add('active');
+  renderConfigTags();
+  document.getElementById('msgList').innerHTML = '';
+  appendMessage('user', query);
+  showTyping();
+  loading = true;
+
+  try {
+    const reply = await callClaude(messages);
+    removeTyping();
+    messages.push({ role: 'assistant', content: reply });
+    appendMessage('ai', reply);
+    saveHistory();
+  } catch(e) {
+    removeTyping();
+    appendMessage('ai', `⚠️ ${e.message}`);
+  }
+  loading = false;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || loading) return;
+  input.value = '';
+  document.getElementById('sendBtn').disabled = true;
+
+  messages.push({ role: 'user', content: text });
+  appendMessage('user', text);
+  showTyping();
+  loading = true;
+
+  try {
+    const reply = await callClaude(messages);
+    removeTyping();
+    messages.push({ role: 'assistant', content: reply });
+    appendMessage('ai', reply);
+    saveHistory();
+  } catch(e) {
+    removeTyping();
+    appendMessage('ai', `⚠️ ${e.message}`);
+  }
+  loading = false;
+  document.getElementById('sendBtn').disabled = !input.value.trim();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function saveHistory() {
+  const syms = [...selectedSymptoms];
+  const custom = document.getElementById('customText').value.trim();
+  if (custom) syms.push(custom);
+  const entry = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString('ko-KR'),
+    uplink: selectedUplink,
+    devices: [...selectedDevices],
+    symptoms: syms,
+    messages: [...messages],
+  };
+  history = [entry, ...history].slice(0, 20);
+  try { localStorage.setItem('uplus_h4', JSON.stringify(history)); } catch {}
+}
+
+function goHome() {
+  document.getElementById('home').style.display = 'flex';
+  document.getElementById('chat').classList.remove('active');
+  selectedUplink = null;
+  selectedDevices.clear();
+  selectedSymptoms.clear();
+  messages = [];
+  document.querySelectorAll('.uplink-btn, .dev-btn, .sym-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('uplinkDesc').classList.remove('show');
+  document.getElementById('customText').value = '';
+  document.getElementById('msgList').innerHTML = '';
+  document.getElementById('chatInput').value = '';
+  document.getElementById('startBtn').disabled = true;
+}
+
+function toggleHistory() {
+  const panel = document.getElementById('histPanel');
+  panel.classList.toggle('open');
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  const list = document.getElementById('histList');
+  if (history.length === 0) {
+    list.innerHTML = '<div class="hist-empty">저장된 내역 없음</div>';
+    return;
+  }
+  list.innerHTML = '';
+  history.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'hist-item';
+    const uplinkLabel = entry.uplink ? `[${UPLINK_INFO[entry.uplink]?.label}] ` : '';
+    div.innerHTML = `
+      <div class="hist-date">${entry.date}</div>
+      <div class="hist-equip">${uplinkLabel}${entry.devices.join(', ')}</div>
+      <div class="hist-sym">${entry.symptoms.slice(0,2).join(' / ')}</div>
+    `;
+    div.onclick = () => loadHistory(entry);
+    list.appendChild(div);
+  });
+}
+
+function loadHistory(entry) {
+  document.getElementById('histPanel').classList.remove('open');
+  // restore state
+  selectedUplink = entry.uplink;
+  selectedDevices = new Set(entry.devices);
+  selectedSymptoms = new Set(entry.symptoms.filter(s => SYMPTOMS.includes(s)));
+  messages = [...entry.messages];
+
+  // Switch to chat
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('chat').classList.add('active');
+  renderConfigTags();
+
+  const list = document.getElementById('msgList');
+  list.innerHTML = '';
+  messages.forEach(m => appendMessage(m.role === 'user' ? 'user' : 'ai', m.content));
+}
+</script>
+</body>
+</html>
