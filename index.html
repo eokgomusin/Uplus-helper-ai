@@ -66,11 +66,19 @@
   .bubble.user { background: #0d1f3c; border: 1px solid #1e3460; color: #a8c4f0; border-bottom-right-radius: 3px; white-space: pre-wrap; word-break: break-word; }
   .bubble.ai { background: #161b27; border: 1px solid #1e2536; color: #d0d5e0; border-bottom-left-radius: 3px; white-space: pre-wrap; word-break: break-word; }
   .typing { color: #4a5568; font-style: italic; font-size: 12px; }
-  .input-area { background: #161b27; border-top: 1px solid #1e2536; padding: 10px 12px; display: flex; gap: 8px; align-items: flex-end; }
+  .input-area { background: #161b27; border-top: 1px solid #1e2536; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .input-row { display: flex; gap: 8px; align-items: flex-end; }
   .chat-input { flex: 1; background: #0f1117; border: 1.5px solid #1e2536; border-radius: 10px; padding: 10px 12px; color: #c8cdd8; font-size: 13px; resize: none; outline: none; line-height: 1.5; font-family: inherit; }
   .chat-input:focus { border-color: #3b6fd4; }
-  .send-btn { background: #e8002d; border: none; border-radius: 10px; padding: 10px 16px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; }
+  .img-btn { background: #1e2536; border: 1.5px solid #2a3248; border-radius: 10px; padding: 9px 12px; color: #8892a8; font-size: 18px; cursor: pointer; flex-shrink: 0; }
+  .send-btn { background: #e8002d; border: none; border-radius: 10px; padding: 10px 16px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
   .send-btn:disabled { opacity: 0.4; }
+  .img-preview-wrap { display: none; align-items: center; gap: 8px; }
+  .img-preview-wrap.show { display: flex; }
+  .img-preview { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid #2a3248; }
+  .img-remove { background: #e8002d; border: none; border-radius: 50%; width: 22px; height: 22px; color: #fff; font-size: 12px; cursor: pointer; flex-shrink: 0; }
+  .img-label { font-size: 11px; color: #6c8ebf; }
+  .bubble-img { max-width: 100%; border-radius: 8px; margin-bottom: 6px; display: block; }
 </style>
 </head>
 <body>
@@ -131,15 +139,24 @@
   </div>
   <div class="msg-list" id="msgList"></div>
   <div class="input-area">
-    <textarea class="chat-input" id="chatInput" rows="2" placeholder="추가 증상이나 확인된 내용 입력..." onkeydown="handleKey(event)"></textarea>
-    <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>전송</button>
+    <div class="img-preview-wrap" id="imgPreviewWrap">
+      <img class="img-preview" id="imgPreview" src="" alt="첨부이미지">
+      <span class="img-label">사진 첨부됨</span>
+      <button class="img-remove" onclick="removeImage()">✕</button>
+    </div>
+    <div class="input-row">
+      <button class="img-btn" onclick="document.getElementById('imgInput').click()">📷</button>
+      <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+      <textarea class="chat-input" id="chatInput" rows="2" placeholder="추가 증상이나 확인된 내용 입력..." onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>전송</button>
+    </div>
   </div>
 </div>
 <script>
 const UPLINK_INFO = {
-  RN:  { label: "광모뎀 개통",     icon: "🏗️", desc: "RN함체 → 드랍선 → 댁내 광모뎀 설치" },
-  ONT: { label: "초소형 ONT 개통", icon: "🔌", desc: "단자함 내 1:4 RN → C501PD + PSE 세트" },
-  L2:  { label: "L2 개통",         icon: "🔧", desc: "L2 스위치 포트 직결 개통" },
+  RN:  { label:"광모뎀 개통", icon:"🏗️", desc:"RN함체 → 드랍선 → 댁내 광모뎀 설치" },
+  ONT: { label:"초소형 ONT 개통", icon:"🔌", desc:"단자함 내 1:4 RN → C501PD + PSE 세트" },
+  L2:  { label:"L2 개통", icon:"🔧", desc:"L2 스위치 포트 직결 개통" },
 };
 const DEVICES = [
   { id:"C504L",      label:"C504L",        sub:"광모뎀",      icon:"📡" },
@@ -170,7 +187,7 @@ const SYSTEM_PROMPT = `당신은 LG U+ 소호 현장 기사 전용 AI 트러블�
 - 초소형ONT 개통(단자함개통) : 단자함 내 1:4 RN → C501PD + PSE
 - L2 개통(즉시개통) : L2 스위치 포트 직결
 - CPG-4020N : 인터넷팩스. 공유기 VoIP 포트 연결
-- 사설공유기(iptime 등) : 자사 장비 아님. 고객 자체 구매. 기본 확인은 가능
+- 사설공유기(iptime 등) : 자사 장비 아님. 고객 자체 구매. 기본 확인 가능
 - 사설허브(iptime 허브 등) : 내부 배선 연결용. 불량 시 특정 단말 또는 전체 불통. VoIP 직결 테스트 시 허브 먼저 제거
 
 ■ LED / 회선 판단
@@ -178,6 +195,7 @@ const SYSTEM_PROMPT = `당신은 LG U+ 소호 현장 기사 전용 AI 트러블�
 - PON 램프 점멸 : 광신호 불안정 (광커넥터 오염, 선로 불량)
 - PON 램프 소등 : 광신호 없음 (단선, RN포트 불량, 드랍선 문제)
 - LOS 램프 점등 : 광손실. 선로 점검 필요
+- 사진 첨부 시 : LED 색상, 점등/소등/점멸 상태, 장비 외관, 배선 구성 등 보고 판단
 
 ■ 연락처
 - 소호 고객센터 : 1544-8585
@@ -199,182 +217,33 @@ const SYSTEM_PROMPT = `당신은 LG U+ 소호 현장 기사 전용 AI 트러블�
 4. ** 마크다운 굵게 절대 사용 금지. 일반 텍스트만.
 5. 문장 짧게. 실무 말투. 질문 1번에 1개만.`;
 
-let selectedUplink = null;
-let selectedDevices = new Set();
-let selectedSymptoms = new Set();
-let messages = [];
-let loading = false;
-let history = [];
+let selectedUplink = null, selectedDevices = new Set(), selectedSymptoms = new Set();
+let messages = [], loading = false, history = [], pendingImage = null;
 
 (function init() {
   const dg = document.getElementById('devGrid');
   DEVICES.forEach(d => {
     const btn = document.createElement('button');
-    btn.className = 'dev-btn';
-    btn.dataset.id = d.id;
+    btn.className = 'dev-btn'; btn.dataset.id = d.id;
     btn.innerHTML = `<span class="dev-icon">${d.icon}</span><span class="dev-label">${d.label}</span><span class="dev-sub">${d.sub}</span>`;
-    btn.onclick = () => toggleDevice(d.id, btn);
-    dg.appendChild(btn);
+    btn.onclick = () => toggleDevice(d.id, btn); dg.appendChild(btn);
   });
   const sg = document.getElementById('symGrid');
   SYMPTOMS.forEach(s => {
     const btn = document.createElement('button');
-    btn.className = 'sym-btn';
-    btn.textContent = s;
-    btn.onclick = () => toggleSymptom(s, btn);
-    sg.appendChild(btn);
+    btn.className = 'sym-btn'; btn.textContent = s;
+    btn.onclick = () => toggleSymptom(s, btn); sg.appendChild(btn);
   });
   try { const saved = localStorage.getItem('uplus_h4'); if (saved) history = JSON.parse(saved); } catch {}
-  document.getElementById('chatInput').addEventListener('input', function() {
-    document.getElementById('sendBtn').disabled = !this.value.trim() || loading;
-  });
+  document.getElementById('chatInput').addEventListener('input', checkSendBtn);
   document.getElementById('customText').addEventListener('input', checkCanStart);
 })();
 
 function selectUplink(id) {
-  if (selectedUplink === id) {
-    selectedUplink = null;
-    document.querySelectorAll('.uplink-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('uplinkDesc').classList.remove('show');
-  } else {
-    selectedUplink = id;
-    document.querySelectorAll('.uplink-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
-    const desc = document.getElementById('uplinkDesc');
-    desc.textContent = UPLINK_INFO[id].desc;
-    desc.classList.add('show');
-  }
+  if (selectedUplink === id) { selectedUplink = null; document.querySelectorAll('.uplink-btn').forEach(b => b.classList.remove('active')); document.getElementById('uplinkDesc').classList.remove('show'); }
+  else { selectedUplink = id; document.querySelectorAll('.uplink-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id)); const desc = document.getElementById('uplinkDesc'); desc.textContent = UPLINK_INFO[id].desc; desc.classList.add('show'); }
   checkCanStart();
 }
-function toggleDevice(id, btn) {
-  if (selectedDevices.has(id)) { selectedDevices.delete(id); btn.classList.remove('active'); }
-  else { selectedDevices.add(id); btn.classList.add('active'); }
-  checkCanStart();
-}
-function toggleSymptom(s, btn) {
-  if (selectedSymptoms.has(s)) { selectedSymptoms.delete(s); btn.classList.remove('active'); }
-  else { selectedSymptoms.add(s); btn.classList.add('active'); }
-  checkCanStart();
-}
-function checkCanStart() {
-  const custom = document.getElementById('customText').value.trim();
-  document.getElementById('startBtn').disabled = !(selectedUplink || selectedDevices.size > 0 || selectedSymptoms.size > 0 || custom);
-}
-function buildQuery() {
-  const parts = [];
-  if (selectedUplink) parts.push(`[개통방식]: ${UPLINK_INFO[selectedUplink].label} — ${UPLINK_INFO[selectedUplink].desc}`);
-  if (selectedDevices.size > 0) parts.push(`[댁내장비]: ${[...selectedDevices].map(id => { const d = DEVICES.find(x => x.id === id); return d ? `${d.label}(${d.sub})` : id; }).join(', ')}`);
-  const syms = [...selectedSymptoms];
-  const custom = document.getElementById('customText').value.trim();
-  if (custom) syms.push(custom);
-  if (syms.length > 0) parts.push(`[증상/상황]: ${syms.join(', ')}`);
-  return parts.join('\n');
-}
-async function callClaude(msgs) {
-  const res = await fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1024, system: SYSTEM_PROMPT, messages: msgs }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${data?.error?.message || '오류'}`);
-  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
-  if (!text) throw new Error('빈 응답');
-  return text;
-}
-function appendMessage(role, content) {
-  const list = document.getElementById('msgList');
-  const row = document.createElement('div');
-  row.className = `msg-row ${role}`;
-  if (role === 'ai') { row.innerHTML = `<div class="avatar">AI</div><div class="bubble ai"></div>`; }
-  else { row.innerHTML = `<div class="bubble user"></div>`; }
-  row.querySelector('.bubble').textContent = content;
-  list.appendChild(row);
-  list.scrollTop = list.scrollHeight;
-}
-function showTyping() {
-  const list = document.getElementById('msgList');
-  const row = document.createElement('div');
-  row.className = 'msg-row ai'; row.id = 'typingRow';
-  row.innerHTML = `<div class="avatar">AI</div><div class="bubble ai"><span class="typing">분석 중 ···</span></div>`;
-  list.appendChild(row); list.scrollTop = list.scrollHeight;
-}
-function removeTyping() { const t = document.getElementById('typingRow'); if (t) t.remove(); }
-function renderConfigTags() {
-  const ct = document.getElementById('configTags'); ct.innerHTML = '';
-  if (selectedUplink) { const u = UPLINK_INFO[selectedUplink]; const s = document.createElement('span'); s.className = 'tag tag-uplink'; s.textContent = `${u.icon} ${u.label}`; ct.appendChild(s); }
-  selectedDevices.forEach(id => { const d = DEVICES.find(x => x.id === id); if (!d) return; const s = document.createElement('span'); s.className = 'tag tag-dev'; s.textContent = `${d.icon} ${d.label}`; ct.appendChild(s); });
-  selectedSymptoms.forEach(sym => { const s = document.createElement('span'); s.className = 'tag tag-sym'; s.textContent = sym; ct.appendChild(s); });
-}
-async function startChat() {
-  if (loading) return;
-  const query = buildQuery();
-  messages = [{ role: 'user', content: query }];
-  document.getElementById('home').style.display = 'none';
-  document.getElementById('chat').classList.add('active');
-  renderConfigTags();
-  document.getElementById('msgList').innerHTML = '';
-  appendMessage('user', query); showTyping(); loading = true;
-  try {
-    const reply = await callClaude(messages);
-    removeTyping(); messages.push({ role: 'assistant', content: reply }); appendMessage('ai', reply); saveHistory();
-  } catch(e) { removeTyping(); appendMessage('ai', `⚠️ ${e.message}`); }
-  loading = false;
-}
-async function sendMessage() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text || loading) return;
-  input.value = ''; document.getElementById('sendBtn').disabled = true;
-  messages.push({ role: 'user', content: text }); appendMessage('user', text); showTyping(); loading = true;
-  try {
-    const reply = await callClaude(messages);
-    removeTyping(); messages.push({ role: 'assistant', content: reply }); appendMessage('ai', reply); saveHistory();
-  } catch(e) { removeTyping(); appendMessage('ai', `⚠️ ${e.message}`); }
-  loading = false; document.getElementById('sendBtn').disabled = !input.value.trim();
-}
-function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-function saveHistory() {
-  const syms = [...selectedSymptoms];
-  const custom = document.getElementById('customText').value.trim();
-  if (custom) syms.push(custom);
-  const entry = { id: Date.now(), date: new Date().toLocaleDateString('ko-KR'), uplink: selectedUplink, devices: [...selectedDevices], symptoms: syms, messages: [...messages] };
-  history = [entry, ...history].slice(0, 20);
-  try { localStorage.setItem('uplus_h4', JSON.stringify(history)); } catch {}
-}
-function goHome() {
-  document.getElementById('home').style.display = 'flex';
-  document.getElementById('chat').classList.remove('active');
-  selectedUplink = null; selectedDevices.clear(); selectedSymptoms.clear(); messages = [];
-  document.querySelectorAll('.uplink-btn, .dev-btn, .sym-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('uplinkDesc').classList.remove('show');
-  document.getElementById('customText').value = '';
-  document.getElementById('msgList').innerHTML = '';
-  document.getElementById('chatInput').value = '';
-  document.getElementById('startBtn').disabled = true;
-}
-function toggleHistory() { document.getElementById('histPanel').classList.toggle('open'); renderHistoryList(); }
-function renderHistoryList() {
-  const list = document.getElementById('histList');
-  if (history.length === 0) { list.innerHTML = '<div class="hist-empty">저장된 내역 없음</div>'; return; }
-  list.innerHTML = '';
-  history.forEach(entry => {
-    const div = document.createElement('div'); div.className = 'hist-item';
-    const uplinkLabel = entry.uplink ? `[${UPLINK_INFO[entry.uplink]?.label}] ` : '';
-    div.innerHTML = `<div class="hist-date">${entry.date}</div><div class="hist-equip">${uplinkLabel}${entry.devices.join(', ')}</div><div class="hist-sym">${entry.symptoms.slice(0,2).join(' / ')}</div>`;
-    div.onclick = () => loadHistory(entry); list.appendChild(div);
-  });
-}
-function loadHistory(entry) {
-  document.getElementById('histPanel').classList.remove('open');
-  selectedUplink = entry.uplink; selectedDevices = new Set(entry.devices);
-  selectedSymptoms = new Set(entry.symptoms.filter(s => SYMPTOMS.includes(s)));
-  messages = [...entry.messages];
-  document.getElementById('home').style.display = 'none';
-  document.getElementById('chat').classList.add('active');
-  renderConfigTags();
-  const list = document.getElementById('msgList'); list.innerHTML = '';
-  messages.forEach(m => appendMessage(m.role === 'user' ? 'user' : 'ai', m.content));
-}
-</script>
-</body>
-</html>
+function toggleDevice(id, btn) { if (selectedDevices.has(id)) { selectedDevices.delete(id); btn.classList.remove('active'); } else { selectedDevices.add(id); btn.classList.add('active'); } checkCanStart(); }
+function toggleSymptom(s, btn) { if (selectedSymptoms.has(s)) { selectedSymptoms.delete(s); btn.classList.remove('active'); } else { selectedSymptoms.add(s); btn.classList.add('active'); } checkCanStart(); }
+function checkCanStart() { const custom = document.getElementById('customText').value.trim(); document.getElementById('startBtn').disabled = !(selectedUplink || selectedDevices.size > 0 || selectedSymp
