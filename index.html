@@ -31,7 +31,6 @@
   .uplink-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .uplink-btn { background: #161b27; border: 1.5px solid #1e2536; border-radius: 10px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.15s; }
   .uplink-btn.active { background: #0d1f3c; border-color: #3b6fd4; box-shadow: 0 0 0 2px rgba(59,111,212,0.25); }
-  .uplink-icon { font-size: 22px; }
   .uplink-label { font-size: 11px; font-weight: 700; color: #c8cdd8; text-align: center; line-height: 1.3; }
   .uplink-sub { font-size: 10px; color: #4a5568; text-align: center; }
   .uplink-desc { background: #0d1f3c; border: 1px solid #1e3460; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #7aa3d4; display: none; }
@@ -39,7 +38,6 @@
   .dev-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
   .dev-btn { background: #161b27; border: 1.5px solid #1e2536; border-radius: 10px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; transition: all 0.15s; }
   .dev-btn.active { background: #0d1f3c; border-color: #3b6fd4; box-shadow: 0 0 0 2px rgba(59,111,212,0.2); }
-  .dev-icon { font-size: 20px; }
   .dev-label { font-size: 10px; font-weight: 700; color: #c8cdd8; text-align: center; }
   .dev-sub { font-size: 9px; color: #4a5568; text-align: center; }
   .sym-grid { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -66,19 +64,19 @@
   .bubble.user { background: #0d1f3c; border: 1px solid #1e3460; color: #a8c4f0; border-bottom-right-radius: 3px; white-space: pre-wrap; word-break: break-word; }
   .bubble.ai { background: #161b27; border: 1px solid #1e2536; color: #d0d5e0; border-bottom-left-radius: 3px; white-space: pre-wrap; word-break: break-word; }
   .typing { color: #4a5568; font-style: italic; font-size: 12px; }
+  .bubble-img { max-width: 100%; border-radius: 8px; margin-bottom: 6px; display: block; }
   .input-area { background: #161b27; border-top: 1px solid #1e2536; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-  .input-row { display: flex; gap: 8px; align-items: flex-end; }
-  .chat-input { flex: 1; background: #0f1117; border: 1.5px solid #1e2536; border-radius: 10px; padding: 10px 12px; color: #c8cdd8; font-size: 13px; resize: none; outline: none; line-height: 1.5; font-family: inherit; }
-  .chat-input:focus { border-color: #3b6fd4; }
-  .img-btn { background: #1e2536; border: 1.5px solid #2a3248; border-radius: 10px; padding: 9px 12px; color: #8892a8; font-size: 18px; cursor: pointer; flex-shrink: 0; }
-  .send-btn { background: #e8002d; border: none; border-radius: 10px; padding: 10px 16px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
-  .send-btn:disabled { opacity: 0.4; }
   .img-preview-wrap { display: none; align-items: center; gap: 8px; }
   .img-preview-wrap.show { display: flex; }
   .img-preview { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid #2a3248; }
+  .img-label { font-size: 11px; color: #6c8ebf; flex: 1; }
   .img-remove { background: #e8002d; border: none; border-radius: 50%; width: 22px; height: 22px; color: #fff; font-size: 12px; cursor: pointer; flex-shrink: 0; }
-  .img-label { font-size: 11px; color: #6c8ebf; }
-  .bubble-img { max-width: 100%; border-radius: 8px; margin-bottom: 6px; display: block; }
+  .input-row { display: flex; gap: 8px; align-items: flex-end; }
+  .img-btn { background: #1e2536; border: 1.5px solid #2a3248; border-radius: 10px; padding: 9px 12px; color: #8892a8; font-size: 13px; cursor: pointer; flex-shrink: 0; font-family: inherit; }
+  .chat-input { flex: 1; background: #0f1117; border: 1.5px solid #1e2536; border-radius: 10px; padding: 10px 12px; color: #c8cdd8; font-size: 13px; resize: none; outline: none; line-height: 1.5; font-family: inherit; }
+  .chat-input:focus { border-color: #3b6fd4; }
+  .send-btn { background: #e8002d; border: none; border-radius: 10px; padding: 10px 16px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
+  .send-btn:disabled { opacity: 0.4; }
 </style>
 </head>
 <body>
@@ -87,35 +85,19 @@
     <span class="logo">U+</span>
     <span class="header-title">현장 AI 도우미</span>
   </div>
-  <button class="hist-btn" onclick="toggleHistory()">📋 히스토리</button>
+  <button class="hist-btn" onclick="toggleHistory()">히스토리</button>
 </div>
 <div class="hist-panel" id="histPanel">
   <div class="hist-head">
     <span>최근 상담 내역</span>
-    <button class="hist-close" onclick="toggleHistory()">✕</button>
+    <button class="hist-close" onclick="toggleHistory()">X</button>
   </div>
   <div id="histList"><div class="hist-empty">저장된 내역 없음</div></div>
 </div>
 <div id="home">
   <div class="section">
     <div class="sec-label"><span class="sec-num">01</span> 개통방식 / 상위단</div>
-    <div class="uplink-grid">
-      <button class="uplink-btn" data-id="RN" onclick="selectUplink('RN')">
-        <span class="uplink-icon">🏗️</span>
-        <span class="uplink-label">광모뎀 개통</span>
-        <span class="uplink-sub">드랍댁내인입</span>
-      </button>
-      <button class="uplink-btn" data-id="ONT" onclick="selectUplink('ONT')">
-        <span class="uplink-icon">🔌</span>
-        <span class="uplink-label">초소형 ONT 개통</span>
-        <span class="uplink-sub">단자함 개통</span>
-      </button>
-      <button class="uplink-btn" data-id="L2" onclick="selectUplink('L2')">
-        <span class="uplink-icon">🔧</span>
-        <span class="uplink-label">L2 개통</span>
-        <span class="uplink-sub">즉시개통</span>
-      </button>
-    </div>
+    <div class="uplink-grid" id="uplinkGrid"></div>
     <div class="uplink-desc" id="uplinkDesc"></div>
   </div>
   <div class="section">
@@ -130,7 +112,7 @@
     <div class="sec-label"><span class="sec-num">04</span> 추가 상황 <span class="sec-opt">(선택)</span></div>
     <textarea id="customText" rows="3" placeholder="예) 광품질 -18dBm, CEM 유선 정상, 접수내용 등..."></textarea>
   </div>
-  <button class="start-btn" id="startBtn" onclick="startChat()" disabled>AI 트러블슈팅 시작 →</button>
+  <button class="start-btn" id="startBtn" onclick="startChat()" disabled>AI 트러블슈팅 시작</button>
 </div>
 <div id="chat">
   <div class="config-bar">
@@ -140,110 +122,180 @@
   <div class="msg-list" id="msgList"></div>
   <div class="input-area">
     <div class="img-preview-wrap" id="imgPreviewWrap">
-      <img class="img-preview" id="imgPreview" src="" alt="첨부이미지">
+      <img class="img-preview" id="imgPreview" src="" alt="">
       <span class="img-label">사진 첨부됨</span>
-      <button class="img-remove" onclick="removeImage()">✕</button>
+      <button class="img-remove" onclick="removeImg()">X</button>
     </div>
     <div class="input-row">
-      <button class="img-btn" onclick="document.getElementById('imgInput').click()">📷</button>
-      <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
-      <textarea class="chat-input" id="chatInput" rows="2" placeholder="추가 증상이나 확인된 내용 입력..." onkeydown="handleKey(event)"></textarea>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>전송</button>
+      <button class="img-btn" onclick="document.getElementById('fileInput').click()">사진</button>
+      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFileSelect(event)">
+      <textarea class="chat-input" id="chatInput" rows="2" placeholder="추가 증상이나 확인된 내용 입력..." onkeydown="onKey(event)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMsg()" disabled>전송</button>
     </div>
   </div>
 </div>
 <script>
-const UPLINK_INFO = {
-  RN:  { label:"광모뎀 개통", icon:"🏗️", desc:"RN함체 → 드랍선 → 댁내 광모뎀 설치" },
-  ONT: { label:"초소형 ONT 개통", icon:"🔌", desc:"단자함 내 1:4 RN → C501PD + PSE 세트" },
-  L2:  { label:"L2 개통", icon:"🔧", desc:"L2 스위치 포트 직결 개통" },
-};
-const DEVICES = [
-  { id:"C504L",      label:"C504L",        sub:"광모뎀",      icon:"📡" },
-  { id:"C514RL",     label:"C514RL",       sub:"광모뎀",      icon:"📡" },
-  { id:"C501PD",     label:"C501PD",       sub:"초소형ONT",   icon:"🔌" },
-  { id:"PSE",        label:"PSE",          sub:"전원공급장치", icon:"⚡" },
-  { id:"WiFi",       label:"기가 와이파이", sub:"자사공유기",  icon:"📶" },
-  { id:"IPTV",       label:"IPTV",         sub:"셋톱박스",    icon:"📺" },
-  { id:"VoIP",       label:"인터넷전화",   sub:"VoIP",        icon:"☎️" },
-  { id:"CPG4020N",   label:"CPG-4020N",    sub:"인터넷팩스",  icon:"🖨️" },
-  { id:"SelfRouter", label:"사설공유기",   sub:"iptime 등",   icon:"🔁" },
-  { id:"SelfHub",    label:"사설허브",     sub:"iptime 등",   icon:"🔀" },
+var UPLINKS = [
+  { id:'RN',  label:'광모뎀 개통',     sub:'드랍댁내인입', desc:'RN함체 -> 드랍선 -> 댁내 광모뎀 설치' },
+  { id:'ONT', label:'초소형 ONT 개통', sub:'단자함 개통',  desc:'단자함 내 1:4 RN -> C501PD + PSE 세트' },
+  { id:'L2',  label:'L2 개통',         sub:'즉시개통',     desc:'L2 스위치 포트 직결 개통' }
 ];
-const SYMPTOMS = [
-  "인터넷 불통 (완전 끊김)","인터넷 느림/불안정","광모뎀 LED 이상",
-  "Wi-Fi 연결 안됨","IPTV 화면 안나옴","전화 불통",
-  "개통 후 인증 안됨","PSE 전원 이상","팩스 송수신 불가",
-  "간헐적 끊김","속도 저하","단자함 구성 확인",
+var DEVICES = [
+  { id:'C504L',      label:'C504L',      sub:'광모뎀' },
+  { id:'C514RL',     label:'C514RL',     sub:'광모뎀' },
+  { id:'C501PD',     label:'C501PD',     sub:'초소형ONT' },
+  { id:'PSE',        label:'PSE',        sub:'전원공급장치' },
+  { id:'WiFi',       label:'기가와이파이', sub:'자사공유기' },
+  { id:'IPTV',       label:'IPTV',       sub:'셋톱박스' },
+  { id:'VoIP',       label:'인터넷전화', sub:'VoIP' },
+  { id:'CPG4020N',   label:'CPG-4020N',  sub:'인터넷팩스' },
+  { id:'SelfRouter', label:'사설공유기', sub:'iptime 등' },
+  { id:'SelfHub',    label:'사설허브',   sub:'iptime 등' }
 ];
-const SYSTEM_PROMPT = `당신은 LG U+ 소호 현장 기사 전용 AI 트러블슈팅 어시스턴트입니다.
-현장 경력 기사 기준으로 답변. 군더더기 없이 핵심만.
+var SYMPTOMS = [
+  '인터넷 불통 (완전 끊김)', '인터넷 느림/불안정', '광모뎀 LED 이상',
+  'Wi-Fi 연결 안됨', 'IPTV 화면 안나옴', '전화 불통',
+  '개통 후 인증 안됨', 'PSE 전원 이상', '팩스 송수신 불가',
+  '간헐적 끊김', '속도 저하', '단자함 구성 확인'
+];
+var PROMPT = '당신은 LG U+ 소호 현장 기사 전용 AI 트러블슈팅 어시스턴트입니다.\n현장 경력 기사 기준으로 답변. 군더더기 없이 핵심만.\n\n장비 지식:\n- C504L / C514RL : 댁내 광모뎀 (자체 전원)\n- C501PD : 초소형 ONT. 무전원 환경 전용. 반드시 PSE 세트\n- PSE : C501PD 전용 전원공급장치\n- 광모뎀 개통(드랍댁내인입) : RN함체(옥상/전주/외부) -> 드랍광선로 -> 댁내 C504L/C514RL\n- 초소형ONT 개통(단자함개통) : 단자함 내 1:4 RN -> C501PD + PSE\n- L2 개통(즉시개통) : L2 스위치 포트 직결\n- CPG-4020N : 인터넷팩스. 공유기 VoIP 포트 연결\n- 사설공유기(iptime 등) : 자사 장비 아님. 고객 자체 구매. 기본 확인 가능\n- 사설허브(iptime 허브 등) : 내부 배선 연결용. 불량 시 특정 단말 또는 전체 불통. VoIP 직결 테스트 시 허브 먼저 제거\n\nLED / 회선 판단:\n- 광회선 LED 적색 : 회선다운. 고객센터 회선다운 접수됨. OMC 연락 또는 접수 확인\n- PON 램프 점멸 : 광신호 불안정 (광커넥터 오염, 선로 불량)\n- PON 램프 소등 : 광신호 없음 (단선, RN포트 불량, 드랍선 문제)\n- LOS 램프 점등 : 광손실. 선로 점검 필요\n- 사진 첨부시 : LED 색상, 점등/소등/점멸 상태, 장비 외관, 배선 구성 등 보고 판단\n\n연락처:\n- 소호 고객센터 : 1544-8585\n- OMC : 국사 회선/포트 이상, VLAN, 원격 조치\n- 114 : VoIP 재등록\n\n해결 패턴:\n- 광회선 LED 적색 -> 회선다운 접수 확인, OMC 연락\n- IPv6/IPv4 혼용 충돌 -> 공유기 IPv4 only 후 재부팅\n- VoIP 불통 -> 공유기 직결(허브 제거) -> 재등록 안되면 114\n- 광모뎀 교체 후 증상 지속 -> 공유기/사설장비 의심\n- 공유기 의심 -> 광모뎀 LAN 노트북 직결로 판별\n- 사설허브 경유 -> 허브 제거 후 직결로 허브 불량 판별\n\n답변 방식:\n1. 첫 답변: 상황요약 / 원인 1~2개 / 확인할 것 1~3개 / 질문 1개\n2. 추가 답변: 원인 좁히기 / 다음 조치 / 다음 질문(필요시) / 해결시 완료\n3. 이모지로 가독성 높이기\n4. ** 마크다운 굵게 절대 사용 금지. 일반 텍스트만.\n5. 문장 짧게. 실무 말투. 질문 1번에 1개만.';
 
-■ 장비 지식
-- C504L / C514RL : 댁내 광모뎀 (자체 전원)
-- C501PD : 초소형 ONT. 무전원 환경 전용. 반드시 PSE 세트
-- PSE : C501PD 전용 전원공급장치
-- 광모뎀 개통(드랍댁내인입) : RN함체(옥상/전주/외부) → 드랍광선로 → 댁내 C504L/C514RL
-- 초소형ONT 개통(단자함개통) : 단자함 내 1:4 RN → C501PD + PSE
-- L2 개통(즉시개통) : L2 스위치 포트 직결
-- CPG-4020N : 인터넷팩스. 공유기 VoIP 포트 연결
-- 사설공유기(iptime 등) : 자사 장비 아님. 고객 자체 구매. 기본 확인 가능
-- 사설허브(iptime 허브 등) : 내부 배선 연결용. 불량 시 특정 단말 또는 전체 불통. VoIP 직결 테스트 시 허브 먼저 제거
+var selUplink=null, selDevices={}, selSymptoms={}, messages=[], loading=false, history=[], pendingImg=null;
 
-■ LED / 회선 판단
-- 광회선 LED 적색 : 회선다운. 고객센터 회선다운 접수됨. OMC 연락 또는 접수 확인
-- PON 램프 점멸 : 광신호 불안정 (광커넥터 오염, 선로 불량)
-- PON 램프 소등 : 광신호 없음 (단선, RN포트 불량, 드랍선 문제)
-- LOS 램프 점등 : 광손실. 선로 점검 필요
-- 사진 첨부 시 : LED 색상, 점등/소등/점멸 상태, 장비 외관, 배선 구성 등 보고 판단
-
-■ 연락처
-- 소호 고객센터 : 1544-8585
-- OMC : 국사 회선·포트 이상, VLAN, 원격 조치
-- 114 : VoIP 재등록
-
-■ 해결 패턴
-- 광회선 LED 적색 → 회선다운 접수 확인, OMC 연락
-- IPv6/IPv4 혼용 충돌 → 공유기 IPv4 only 후 재부팅
-- VoIP 불통 → 공유기 직결(허브 제거) → 재등록 안되면 114
-- 광모뎀 교체 후 증상 지속 → 공유기/사설장비 의심
-- 공유기 의심 → 광모뎀 LAN 노트북 직결로 판별
-- 사설허브 경유 → 허브 제거 후 직결로 허브 불량 판별
-
-■ 답변 방식
-1. 첫 답변: 📋 상황요약 / 🔍 원인 1~2개 / ✅ 확인할 것 1~3개 / ❓ 질문 1개
-2. 추가 답변: 원인 좁히기 / ✅ 다음 조치 / ❓ 다음 질문(필요시) / 해결시 ✅ 완료
-3. 이모지: 📡광모뎀 | 📶와이파이 | ☎️전화 | 📺IPTV | ⚡전원 | 🔴불량 | 🟢정상 | 🔄재부팅 | 🔧조치 | 📞연락 | 🔁사설공유기 | 🔀허브
-4. ** 마크다운 굵게 절대 사용 금지. 일반 텍스트만.
-5. 문장 짧게. 실무 말투. 질문 1번에 1개만.`;
-
-let selectedUplink = null, selectedDevices = new Set(), selectedSymptoms = new Set();
-let messages = [], loading = false, history = [], pendingImage = null;
-
-(function init() {
-  const dg = document.getElementById('devGrid');
-  DEVICES.forEach(d => {
-    const btn = document.createElement('button');
-    btn.className = 'dev-btn'; btn.dataset.id = d.id;
-    btn.innerHTML = `<span class="dev-icon">${d.icon}</span><span class="dev-label">${d.label}</span><span class="dev-sub">${d.sub}</span>`;
-    btn.onclick = () => toggleDevice(d.id, btn); dg.appendChild(btn);
-  });
-  const sg = document.getElementById('symGrid');
-  SYMPTOMS.forEach(s => {
-    const btn = document.createElement('button');
-    btn.className = 'sym-btn'; btn.textContent = s;
-    btn.onclick = () => toggleSymptom(s, btn); sg.appendChild(btn);
-  });
-  try { const saved = localStorage.getItem('uplus_h4'); if (saved) history = JSON.parse(saved); } catch {}
-  document.getElementById('chatInput').addEventListener('input', checkSendBtn);
-  document.getElementById('customText').addEventListener('input', checkCanStart);
+(function() {
+  var ug=document.getElementById('uplinkGrid');
+  for(var i=0;i<UPLINKS.length;i++){(function(u){
+    var btn=document.createElement('button'); btn.className='uplink-btn'; btn.setAttribute('data-id',u.id);
+    btn.innerHTML='<span class="uplink-label">'+u.label+'</span><span class="uplink-sub">'+u.sub+'</span>';
+    btn.onclick=function(){toggleUplink(u.id);}; ug.appendChild(btn);
+  })(UPLINKS[i]);}
+  var dg=document.getElementById('devGrid');
+  for(var i=0;i<DEVICES.length;i++){(function(d){
+    var btn=document.createElement('button'); btn.className='dev-btn'; btn.setAttribute('data-id',d.id);
+    btn.innerHTML='<span class="dev-label">'+d.label+'</span><span class="dev-sub">'+d.sub+'</span>';
+    btn.onclick=function(){toggleDevice(d.id,btn);}; dg.appendChild(btn);
+  })(DEVICES[i]);}
+  var sg=document.getElementById('symGrid');
+  for(var i=0;i<SYMPTOMS.length;i++){(function(s){
+    var btn=document.createElement('button'); btn.className='sym-btn'; btn.textContent=s;
+    btn.onclick=function(){toggleSymptom(s,btn);}; sg.appendChild(btn);
+  })(SYMPTOMS[i]);}
+  try{var saved=localStorage.getItem('uplus_h5'); if(saved)history=JSON.parse(saved);}catch(e){}
+  document.getElementById('chatInput').addEventListener('input',checkSendBtn);
+  document.getElementById('customText').addEventListener('input',checkStartBtn);
 })();
 
-function selectUplink(id) {
-  if (selectedUplink === id) { selectedUplink = null; document.querySelectorAll('.uplink-btn').forEach(b => b.classList.remove('active')); document.getElementById('uplinkDesc').classList.remove('show'); }
-  else { selectedUplink = id; document.querySelectorAll('.uplink-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id)); const desc = document.getElementById('uplinkDesc'); desc.textContent = UPLINK_INFO[id].desc; desc.classList.add('show'); }
-  checkCanStart();
+function toggleUplink(id){
+  if(selUplink===id){selUplink=null; document.querySelectorAll('.uplink-btn').forEach(function(b){b.classList.remove('active');}); document.getElementById('uplinkDesc').classList.remove('show');}
+  else{selUplink=id; document.querySelectorAll('.uplink-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-id')===id);}); var u=null; for(var i=0;i<UPLINKS.length;i++){if(UPLINKS[i].id===id){u=UPLINKS[i];break;}} var desc=document.getElementById('uplinkDesc'); desc.textContent=u?u.desc:''; desc.classList.add('show');}
+  checkStartBtn();
 }
-function toggleDevice(id, btn) { if (selectedDevices.has(id)) { selectedDevices.delete(id); btn.classList.remove('active'); } else { selectedDevices.add(id); btn.classList.add('active'); } checkCanStart(); }
-function toggleSymptom(s, btn) { if (selectedSymptoms.has(s)) { selectedSymptoms.delete(s); btn.classList.remove('active'); } else { selectedSymptoms.add(s); btn.classList.add('active'); } checkCanStart(); }
-function checkCanStart() { const custom = document.getElementById('customText').value.trim(); document.getElementById('startBtn').disabled = !(selectedUplink || selectedDevices.size > 0 || selectedSymp
+function toggleDevice(id,btn){if(selDevices[id]){delete selDevices[id];btn.classList.remove('active');}else{selDevices[id]=true;btn.classList.add('active');}checkStartBtn();}
+function toggleSymptom(s,btn){if(selSymptoms[s]){delete selSymptoms[s];btn.classList.remove('active');}else{selSymptoms[s]=true;btn.classList.add('active');}checkStartBtn();}
+function checkStartBtn(){var custom=document.getElementById('customText').value.trim(); document.getElementById('startBtn').disabled=!(selUplink||Object.keys(selDevices).length>0||Object.keys(selSymptoms).length>0||custom);}
+function checkSendBtn(){var text=document.getElementById('chatInput').value.trim(); document.getElementById('sendBtn').disabled=(!text&&!pendingImg)||loading;}
+
+function onFileSelect(e){
+  var file=e.target.files[0]; if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){var dataUrl=ev.target.result; pendingImg={base64:dataUrl.split(',')[1],mediaType:file.type||'image/jpeg',dataUrl:dataUrl}; document.getElementById('imgPreview').src=dataUrl; document.getElementById('imgPreviewWrap').classList.add('show'); checkSendBtn();};
+  reader.readAsDataURL(file); e.target.value='';
+}
+function removeImg(){pendingImg=null; document.getElementById('imgPreview').src=''; document.getElementById('imgPreviewWrap').classList.remove('show'); checkSendBtn();}
+
+function buildQuery(){
+  var parts=[];
+  if(selUplink){var u=null;for(var i=0;i<UPLINKS.length;i++){if(UPLINKS[i].id===selUplink){u=UPLINKS[i];break;}}if(u)parts.push('[개통방식]: '+u.label+' - '+u.desc);}
+  var devIds=Object.keys(selDevices);
+  if(devIds.length>0){var dl=[];for(var i=0;i<devIds.length;i++){for(var j=0;j<DEVICES.length;j++){if(DEVICES[j].id===devIds[i]){dl.push(DEVICES[j].label+'('+DEVICES[j].sub+')');break;}}}parts.push('[댁내장비]: '+dl.join(', '));}
+  var syms=Object.keys(selSymptoms); var custom=document.getElementById('customText').value.trim(); if(custom)syms.push(custom);
+  if(syms.length>0)parts.push('[증상/상황]: '+syms.join(', '));
+  return parts.join('\n');
+}
+
+function callClaude(msgs,cb){
+  fetch('/api/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1024,system:PROMPT,messages:msgs})})
+  .then(function(r){return r.json().then(function(d){return{ok:r.ok,status:r.status,data:d};});})
+  .then(function(r){
+    if(!r.ok){cb('HTTP '+r.status+': '+(r.data&&r.data.error?r.data.error.message:'오류'),null);return;}
+    var text=''; if(r.data.content){for(var i=0;i<r.data.content.length;i++){if(r.data.content[i].type==='text')text+=r.data.content[i].text;}}
+    if(!text){cb('빈 응답',null);return;} cb(null,text);
+  }).catch(function(e){cb(e.message,null);});
+}
+
+function addMsg(role,text,imgSrc){
+  var list=document.getElementById('msgList'); var row=document.createElement('div'); row.className='msg-row '+role;
+  var bubble=document.createElement('div'); bubble.className='bubble '+role;
+  if(imgSrc){var img=document.createElement('img');img.src=imgSrc;img.className='bubble-img';bubble.appendChild(img);}
+  if(text){var span=document.createElement('span');span.textContent=text;bubble.appendChild(span);}
+  if(role==='ai'){var av=document.createElement('div');av.className='avatar';av.textContent='AI';row.appendChild(av);}
+  row.appendChild(bubble); list.appendChild(row); list.scrollTop=list.scrollHeight;
+}
+function showTyping(){var list=document.getElementById('msgList');var row=document.createElement('div');row.className='msg-row ai';row.id='typingRow';row.innerHTML='<div class="avatar">AI</div><div class="bubble ai"><span class="typing">분석 중...</span></div>';list.appendChild(row);list.scrollTop=list.scrollHeight;}
+function hideTyping(){var t=document.getElementById('typingRow');if(t)t.remove();}
+
+function renderTags(){
+  var ct=document.getElementById('configTags'); ct.innerHTML='';
+  if(selUplink){var u=null;for(var i=0;i<UPLINKS.length;i++){if(UPLINKS[i].id===selUplink){u=UPLINKS[i];break;}}if(u){var s=document.createElement('span');s.className='tag tag-uplink';s.textContent=u.label;ct.appendChild(s);}}
+  var devIds=Object.keys(selDevices);for(var i=0;i<devIds.length;i++){for(var j=0;j<DEVICES.length;j++){if(DEVICES[j].id===devIds[i]){var s=document.createElement('span');s.className='tag tag-dev';s.textContent=DEVICES[j].label;ct.appendChild(s);break;}}}
+  var syms=Object.keys(selSymptoms);for(var i=0;i<syms.length;i++){var s=document.createElement('span');s.className='tag tag-sym';s.textContent=syms[i];ct.appendChild(s);}
+}
+
+function startChat(){
+  if(loading)return; var query=buildQuery(); if(!query)return;
+  messages=[{role:'user',content:query}];
+  document.getElementById('home').style.display='none'; document.getElementById('chat').classList.add('active');
+  renderTags(); document.getElementById('msgList').innerHTML=''; addMsg('user',query,null); showTyping(); loading=true;
+  callClaude(messages,function(err,reply){hideTyping();loading=false;if(err){addMsg('ai','오류: '+err,null);return;}messages.push({role:'assistant',content:reply});addMsg('ai',reply,null);saveHistory();});
+}
+
+function sendMsg(){
+  var input=document.getElementById('chatInput'); var text=input.value.trim();
+  if((!text&&!pendingImg)||loading)return;
+  input.value=''; document.getElementById('sendBtn').disabled=true;
+  var userContent; var imgSrc=null;
+  if(pendingImg){imgSrc=pendingImg.dataUrl;userContent=[{type:'image',source:{type:'base64',media_type:pendingImg.mediaType,data:pendingImg.base64}},{type:'text',text:text||'이 사진 보고 장비 상태 판단해줘.'}];removeImg();}
+  else{userContent=text;}
+  messages.push({role:'user',content:userContent}); addMsg('user',text,imgSrc); showTyping(); loading=true;
+  callClaude(messages,function(err,reply){hideTyping();loading=false;if(err){addMsg('ai','오류: '+err,null);return;}messages.push({role:'assistant',content:reply});addMsg('ai',reply,null);saveHistory();checkSendBtn();});
+}
+
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+
+function saveHistory(){
+  var syms=Object.keys(selSymptoms); var custom=document.getElementById('customText').value.trim(); if(custom)syms.push(custom);
+  var entry={id:Date.now(),date:new Date().toLocaleDateString('ko-KR'),uplink:selUplink,devices:Object.keys(selDevices),symptoms:syms,messages:messages.slice()};
+  history=[entry].concat(history).slice(0,20); try{localStorage.setItem('uplus_h5',JSON.stringify(history));}catch(e){}
+}
+
+function goHome(){
+  document.getElementById('home').style.display='flex'; document.getElementById('chat').classList.remove('active');
+  selUplink=null;selDevices={};selSymptoms={};messages=[];
+  document.querySelectorAll('.uplink-btn,.dev-btn,.sym-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('uplinkDesc').classList.remove('show');
+  document.getElementById('customText').value=''; document.getElementById('msgList').innerHTML='';
+  document.getElementById('chatInput').value=''; document.getElementById('startBtn').disabled=true; removeImg();
+}
+
+function toggleHistory(){document.getElementById('histPanel').classList.toggle('open');renderHistList();}
+function renderHistList(){
+  var list=document.getElementById('histList');
+  if(history.length===0){list.innerHTML='<div class="hist-empty">저장된 내역 없음</div>';return;}
+  list.innerHTML='';
+  for(var i=0;i<history.length;i++){(function(entry){
+    var div=document.createElement('div');div.className='hist-item';
+    var ul='';if(entry.uplink){for(var j=0;j<UPLINKS.length;j++){if(UPLINKS[j].id===entry.uplink){ul='['+UPLINKS[j].label+'] ';break;}}}
+    div.innerHTML='<div class="hist-date">'+entry.date+'</div><div class="hist-equip">'+ul+entry.devices.join(', ')+'</div><div class="hist-sym">'+entry.symptoms.slice(0,2).join(' / ')+'</div>';
+    div.onclick=function(){loadHist(entry);}; list.appendChild(div);
+  })(history[i]);}
+}
+function loadHist(entry){
+  document.getElementById('histPanel').classList.remove('open');
+  selUplink=entry.uplink;selDevices={};for(var i=0;i<entry.devices.length;i++)selDevices[entry.devices[i]]=true;selSymptoms={};messages=entry.messages.slice();
+  document.getElementById('home').style.display='none';document.getElementById('chat').classList.add('active');renderTags();
+  var list=document.getElementById('msgList');list.innerHTML='';
+  for(var i=0;i<messages.length;i++){var m=messages[i];var txt=typeof m.content==='string'?m.content:(m.content[1]?m.content[1].text:'');addMsg(m.role==='user'?'user':'ai',txt,null);}
+}
+</script>
+</body>
+</html>
